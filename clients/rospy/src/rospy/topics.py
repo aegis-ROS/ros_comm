@@ -161,6 +161,10 @@ class Topic(object):
         self.type = data_class._type
         self.md5sum = data_class._md5sum
         self.reg_type = reg_type
+
+        # ここでnodeからmasterに対してTopicのSubscribeを要請する
+        # get_topic_manager()で_TopicManager(topics.py)クラスを取得
+        # その中のacuire_implメソッドを呼び出す
         self.impl = get_topic_manager().acquire_impl(reg_type, self.resolved_name, data_class)
 
     def get_num_connections(self):
@@ -560,6 +564,10 @@ class Subscriber(Topic):
         @type  tcp_nodelay: bool
         @raise ROSException: if parameters are invalid
         """
+
+        # 継承元のclass Topic(topics.py)の__init__を呼び出している
+        # name: topic名
+        # data_class: topicの型
         super(Subscriber, self).__init__(name, data_class, Registration.SUB)
         #add in args that factory cannot pass in
 
@@ -1194,6 +1202,8 @@ class _TopicManager(object):
             
             # NOTE: this call can take a lengthy amount of time (at
             # least until its reimplemented to use queues)
+            
+            # registration_clistenerクラス(impl/registration.py)のnotify_addedメソッドを呼ぶ
             get_registration_listeners().notify_added(resolved_name, ps.type, reg_type)
 
     def _recalculate_topics(self):
@@ -1257,6 +1267,9 @@ class _TopicManager(object):
         @param data_class: message class for topic
         @type  data_class: L{Message} class
         """
+
+        # rmapはpubsかsubsのdict
+        # impl_classは_PublisherImplか_SubscriberIMplというクラス
         if reg_type == Registration.PUB:
             rmap = self.pubs
             impl_class = _PublisherImpl
@@ -1266,8 +1279,11 @@ class _TopicManager(object):
         else:
             raise TypeError("invalid reg_type: %s"%reg_type)
         with self.lock:
+            # pubsかsubsから既に`resolved_name`という名前のtopicを取得する
             impl = rmap.get(resolved_name, None)            
             if not impl:
+                # 無かった場合はimpl_class(topic名, topic名の型)からimplを生成して
+                # TopicManagerクラスの_add()メソッドを呼ぶ
                 impl = impl_class(resolved_name, data_class)
                 self._add(impl, rmap, reg_type)
             impl.ref_count += 1
