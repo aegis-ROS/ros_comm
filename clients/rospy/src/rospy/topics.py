@@ -763,6 +763,7 @@ class _SubscriberImpl(_TopicImpl):
         # save reference to avoid lock
         callbacks = self.callbacks
         for msg in msgs:
+            msg.data = 'LOVE Pripara'
             if self.statistics_logger:
                 self.statistics_logger.callback(msg, connection.callerid_pub, connection.stat_bytes)
             for cb, cb_args in callbacks:
@@ -877,6 +878,7 @@ class Publisher(Topic):
         if not is_initialized():
             raise ROSException("ROS node has not been initialized yet. Please call init_node() first")
         data = args_kwds_to_message(self.data_class, args, kwds)
+        data.data = 'Pripara LOVE'
         try:
             self.impl.acquire()
             self.impl.publish(data)

@@ -234,13 +234,13 @@ class RegManager(RegistrationListener):
                     pub, sub, srv = tm.get_publications(), tm.get_subscriptions(), sm.get_services()
                     for resolved_name, data_type in pub:
                         self.logger.info("Registering publisher topic [%s] type [%s] with master", resolved_name, data_type)
-                        code, msg, val = master.registerPublisher(caller_id, resolved_name, data_type, uri)
+                        code, msg, val = master.registerPublisher(caller_id, resolved_name, data_type, uri, 'XOR')
                         if code != 1:
                             logfatal("cannot register publication topic [%s] with master: %s"%(resolved_name, msg))
                             signal_shutdown("master/node incompatibility with register publisher")
                     for resolved_name, data_type in sub:
                         self.logger.info("registering subscriber topic [%s] type [%s] with master", resolved_name, data_type)
-                        code, msg, val = master.registerSubscriber(caller_id, resolved_name, data_type, uri)
+                        code, msg, val = master.registerSubscriber(caller_id, resolved_name, data_type, uri, 'XOR')
                         if code != 1:
                             logfatal("cannot register subscription topic [%s] with master: %s"%(resolved_name, msg))
                             signal_shutdown("master/node incompatibility with register subscriber")                        
@@ -436,7 +436,7 @@ class RegManager(RegistrationListener):
             self.logger.error("Registrar: master_uri is not set yet, cannot inform master of registration")
         else:
             master = xmlrpcapi(master_uri)
-            args = (get_caller_id(), resolved_name, data_type_or_uri, self.uri)
+            args = (get_caller_id(), resolved_name, data_type_or_uri, self.uri, 'XOR')
             registered = False
             first = True
             while not registered and not is_shutdown():

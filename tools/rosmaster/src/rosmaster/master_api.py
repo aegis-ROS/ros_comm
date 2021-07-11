@@ -675,7 +675,7 @@ class ROSMasterHandler(object):
     # PUBLISH/SUBSCRIBE
 
     @apivalidate([], ( is_topic('topic'), valid_type_name('topic_type'), is_api('caller_api')))
-    def registerSubscriber(self, caller_id, topic, topic_type, caller_api):
+    def registerSubscriber(self, caller_id, topic, topic_type, caller_api, enc_type=None):
         """
         Subscribe the caller to the specified topic. In addition to receiving
         a list of current publishers, the subscriber will also receive notifications
@@ -687,11 +687,14 @@ class ROSMasterHandler(object):
         @type  topic_type: str
         @param caller_api: XML-RPC URI of caller node for new publisher notifications
         @type  caller_api: str
+        @param enc_type: str: Topic encliption type
+        @type enc_type: str
         @return: (code, message, publishers). Publishers is a list of XMLRPC API URIs
            for nodes currently publishing the specified topic.
         @rtype: (int, str, [str])
         """
         #NOTE: subscribers do not get to set topic type
+        print(f'enc_type: {enc_type}')
         try:
             self.ps_lock.acquire()
             self.reg_manager.register_subscriber(topic, caller_id, caller_api)
@@ -732,7 +735,7 @@ class ROSMasterHandler(object):
             self.ps_lock.release()
 
     @apivalidate([], ( is_topic('topic'), valid_type_name('topic_type'), is_api('caller_api')))
-    def registerPublisher(self, caller_id, topic, topic_type, caller_api):
+    def registerPublisher(self, caller_id, topic, topic_type, caller_api, enc_type=None):
         """
         Register the caller as a publisher the topic.
         @param caller_id: ROS caller id
@@ -744,11 +747,14 @@ class ROSMasterHandler(object):
         @type  topic_type: str
         @param caller_api str: ROS caller XML-RPC API URI
         @type  caller_api: str
+        @param enc_type: str: Topic encliption type
+        @type enc_type: str
         @return: (code, statusMessage, subscriberApis).
         List of current subscribers of topic in the form of XMLRPC URIs.
         @rtype: (int, str, [str])
         """
         #NOTE: we need topic_type for getPublishedTopics.
+        print(f'enc_type: {enc_type}')
         try:
             self.ps_lock.acquire()
             self.reg_manager.register_publisher(topic, caller_id, caller_api)
