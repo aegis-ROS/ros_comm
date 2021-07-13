@@ -677,6 +677,8 @@ class ROSMasterHandler(object):
     @apivalidate([], ( is_topic('topic'), valid_type_name('topic_type'), is_api('caller_api')))
     def registerSubscriber(self, caller_id, topic, topic_type, caller_api):
         """
+        nodeがmasterに対してSubscriberの登録をする際に呼ぶメソッド
+
         Subscribe the caller to the specified topic. In addition to receiving
         a list of current publishers, the subscriber will also receive notifications
         of new publishers via the publisherUpdate API.        
