@@ -197,3 +197,13 @@ def valid_type_name(param_name):
         #TODO: actual validation of chars
         return param_value
     return validator
+
+def valid_enc_type(param_name):
+    def validator(param_name, caller_id):
+        print('Im validator')
+        list_enc_type = ['XOR', 'RSA', 'AES']
+        if not param_name in list_enc_type and not None:
+            print(f'fuck, {param_name}, {list_enc_type}')
+            raise ParameterInvalid(f'ERROR: unknown encliption type {param_name}')
+        return param_name
+    return validator

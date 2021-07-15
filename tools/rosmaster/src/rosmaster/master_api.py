@@ -71,7 +71,7 @@ import rosmaster.threadpool
 
 from rosmaster.util import xmlrpcapi
 from rosmaster.registrations import RegistrationManager
-from rosmaster.validators import non_empty, non_empty_str, not_none, is_api, is_topic, is_service, valid_type_name, valid_name, empty_or_valid_name, ParameterInvalid
+from rosmaster.validators import non_empty, non_empty_str, not_none, is_api, is_topic, is_service, valid_type_name, valid_name, empty_or_valid_name, ParameterInvalid, valid_enc_type
 
 NUM_WORKERS = 3 #number of threads we use to send publisher_update notifications
 
@@ -674,7 +674,7 @@ class ROSMasterHandler(object):
     ##################################################################################
     # PUBLISH/SUBSCRIBE
 
-    @apivalidate([], ( is_topic('topic'), valid_type_name('topic_type'), is_api('caller_api')))
+    @apivalidate([], ( is_topic('topic'), valid_type_name('topic_type'), is_api('caller_api'), valid_enc_type('enc_type')))
     def registerSubscriber(self, caller_id, topic, topic_type, caller_api, enc_type=None):
         """
         Subscribe the caller to the specified topic. In addition to receiving
@@ -694,7 +694,6 @@ class ROSMasterHandler(object):
         @rtype: (int, str, [str])
         """
         #NOTE: subscribers do not get to set topic type
-        print(f'enc_type: {enc_type}')
         try:
             self.ps_lock.acquire()
             self.reg_manager.register_subscriber(topic, caller_id, caller_api)
@@ -708,6 +707,7 @@ class ROSMasterHandler(object):
             pub_uris = self.publishers.get_apis(topic)
         finally:
             self.ps_lock.release()
+        print(f'enc_type: {enc_type}')
         return 1, "Subscribed to [%s]"%topic, pub_uris
 
     @apivalidate(0, (is_topic('topic'), is_api('caller_api')))
@@ -734,7 +734,7 @@ class ROSMasterHandler(object):
         finally:
             self.ps_lock.release()
 
-    @apivalidate([], ( is_topic('topic'), valid_type_name('topic_type'), is_api('caller_api')))
+    @apivalidate([], ( is_topic('topic'), valid_type_name('topic_type'), is_api('caller_api'), valid_enc_type('enc_type')))
     def registerPublisher(self, caller_id, topic, topic_type, caller_api, enc_type=None):
         """
         Register the caller as a publisher the topic.
@@ -754,7 +754,7 @@ class ROSMasterHandler(object):
         @rtype: (int, str, [str])
         """
         #NOTE: we need topic_type for getPublishedTopics.
-        print(f'enc_type: {enc_type}')
+        print('registerPub')
         try:
             self.ps_lock.acquire()
             self.reg_manager.register_publisher(topic, caller_id, caller_api)
@@ -768,6 +768,7 @@ class ROSMasterHandler(object):
             sub_uris = self.subscribers.get_apis(topic)            
         finally:
             self.ps_lock.release()
+        print(f'enc_type: {enc_type}')
         return 1, "Registered [%s] as publisher of [%s]"%(caller_id, topic), sub_uris
 
 

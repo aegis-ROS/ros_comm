@@ -96,6 +96,8 @@ from rospy.impl.registration import get_topic_manager, set_topic_manager, Regist
 from rospy.impl.tcpros import get_tcpros_handler, DEFAULT_BUFF_SIZE
 from rospy.impl.tcpros_pubsub import QueuedConnection
 
+from rospy.encrypt import Encrypt
+
 _logger = logging.getLogger('rospy.topics')
 
 # wrap genpy implementation and map it to rospy namespace
@@ -621,6 +623,10 @@ class _SubscriberImpl(_TopicImpl):
             if SubscriberStatisticsLogger.is_enabled() \
             else None
 
+        self.encryption = Encrypt()
+        self.encryption.set_encryption_type('XOR')
+        self.encryption.set_key('aegis-test')
+
     def close(self):
         """close I/O and release resources"""
         _TopicImpl.close(self)
@@ -763,7 +769,7 @@ class _SubscriberImpl(_TopicImpl):
         # save reference to avoid lock
         callbacks = self.callbacks
         for msg in msgs:
-            msg.data = 'LOVE Pripara'
+            msg.data = self.encryption.dec(msg.data)
             if self.statistics_logger:
                 self.statistics_logger.callback(msg, connection.callerid_pub, connection.stat_bytes)
             for cb, cb_args in callbacks:
@@ -878,7 +884,7 @@ class Publisher(Topic):
         if not is_initialized():
             raise ROSException("ROS node has not been initialized yet. Please call init_node() first")
         data = args_kwds_to_message(self.data_class, args, kwds)
-        data.data = 'Pripara LOVE'
+        data.data = self.impl.encryption.dec(data.data)
         try:
             self.impl.acquire()
             self.impl.publish(data)
@@ -921,6 +927,10 @@ class _PublisherImpl(_TopicImpl):
 
         #STATS
         self.message_data_sent = 0
+
+        self.encryption = Encrypt()
+        self.encryption.set_encryption_type('XOR')
+        self.encryption.set_key('aegis-test')
 
     def close(self):
         """close I/O and release resources"""
