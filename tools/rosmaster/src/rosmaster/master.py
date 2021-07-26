@@ -61,7 +61,6 @@ class Master(object):
         self.handler = None
         self.master_node = None
         self.uri = None
-        print('fuck you fuck')
 
         handler = rosmaster.master_api.ROSMasterHandler(self.num_workers)
         master_node = rosgraph.xmlrpc.XmlRpcNode(self.port, handler)
@@ -75,9 +74,6 @@ class Master(object):
         self.handler = handler
         self.master_node = master_node
         self.uri = master_node.uri
-        
-        logging.getLogger('rosmaster.master').warn("Master initialized: port[%s], uri[%s]", self.port, self.uri)
-        print('fuck fuck fuck you fuck')
 
     def ok(self):
         if self.master_node is not None:

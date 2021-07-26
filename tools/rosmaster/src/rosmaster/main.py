@@ -121,10 +121,6 @@ WARNING ACHTUNG WARNING ACHTUNG WARNING
         else:
             logger.error("--master-logger-level received unknown option '{}'".format(options.master_logger_level))
 
-    print('[fuck you]set log level')
-    logging.getLogger("rosmaster.master").setLevel(logging.DEBUG)
-    logging.getLogger('rosmaster.master').info('log level test')
-
     try:
         logger.info("Starting ROS Master Node")
         master = rosmaster.master.Master(port, options.num_workers)
