@@ -624,8 +624,8 @@ class _SubscriberImpl(_TopicImpl):
             else None
 
         self.encryption = Encrypt()
-        self.encryption.set_encryption_type('XOR')
         self.encryption.set_key('aegis-test')
+        self.encryption.set_encryption_type('XOR')
 
     def close(self):
         """close I/O and release resources"""
@@ -769,7 +769,9 @@ class _SubscriberImpl(_TopicImpl):
         # save reference to avoid lock
         callbacks = self.callbacks
         for msg in msgs:
+            print(f'before msg.data is {msg.data}')
             msg.data = self.encryption.dec(msg.data)
+            print(f'affter msg.data is {msg.data}')
             if self.statistics_logger:
                 self.statistics_logger.callback(msg, connection.callerid_pub, connection.stat_bytes)
             for cb, cb_args in callbacks:
@@ -884,7 +886,9 @@ class Publisher(Topic):
         if not is_initialized():
             raise ROSException("ROS node has not been initialized yet. Please call init_node() first")
         data = args_kwds_to_message(self.data_class, args, kwds)
-        data.data = self.impl.encryption.dec(data.data)
+        print(f'before `data.data` is {data.data}')
+        data.data = self.impl.encryption.enc(data.data)
+        print(f'affter `data.data` is {data.data}')
         try:
             self.impl.acquire()
             self.impl.publish(data)
@@ -929,8 +933,8 @@ class _PublisherImpl(_TopicImpl):
         self.message_data_sent = 0
 
         self.encryption = Encrypt()
-        self.encryption.set_encryption_type('XOR')
         self.encryption.set_key('aegis-test')
+        self.encryption.set_encryption_type('XOR')
 
     def close(self):
         """close I/O and release resources"""
