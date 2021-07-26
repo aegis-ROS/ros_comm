@@ -29,6 +29,7 @@ class Encrypt():
     def enc(self, plain_message):
         if not self.encryption:
             raise Exception('Not prepared')
+        print(f'I am `Encrypt.enc(). Plain_message is {plain_message}')
         return self.encryption.enc(plain_message)
 
     def dec(self, cipher_message):
@@ -61,14 +62,45 @@ class BaseEncryption():
         return cipher_message
 
 class XOR(BaseEncryption):
+    # "pythonでXORプチ暗号化 - Qiita", https://qiita.com/magiclib/items/fe2c4b2c4a07e039b905, (参照2021-07-26)
     def __init__(self, key):
         super().__init__(key)
 
     def enc(self, plain_message):
-        return ''.join([chr(ord(c1) ^ ord(c2)) for (c1, c2) in zip(plain_message, self.key)])
+        # ret = ''.join([chr(ord(c1) ^ ord(c2)) for (c1, c2) in zip(plain_message, self.key[:len(plain_message)])])
+        # print(f'I am `XOR.enc()`. original = {plain_message}, affter = {ret}')
+        # return ''.join([chr(ord(c1) ^ ord(c2)) for (c1, c2) in zip(plain_message, self.key[:len(plain_message)])])
+        if plain_message and self.key:
+            xor_code = self.key
+        # keyが短い場合は、繰り返して必要バイト数を準備する
+        while len(plain_message) > len(xor_code):
+            xor_code += self.key
+        ret = "".join([chr(ord(data) ^ ord(code))
+                        for (data, code) in zip(plain_message, xor_code)]).encode().hex()
+        print(f'I am `XOR.enc()`. original = {plain_message}, affter = {ret}')
+        return "".join([chr(ord(data) ^ ord(code))
+                        for (data, code) in zip(plain_message, xor_code)]).encode().hex()
+
 
     def dec(self, cipher_message):
-        return ''.join([chr(ord(c1) ^ ord(c2)) for (c1,c2) in zip(cipher_message, self.key)])
+        if cipher_message and self.key:
+            try:
+                crypt_data = bytes.fromhex(cipher_message).decode()
+                print(f'I am XOR.dec(). crypt_data is {crypt_data}')
+            except ValueError:
+                print('decode() fucked')
+                crypt_data = None
+
+            if crypt_data:
+                xor_code = self.key
+                # keyが短い場合は、繰り返して必要バイト数を準備する
+                while len(crypt_data) > len(xor_code):
+                    xor_code += self.key
+                ret = "".join([chr(ord(data) ^ ord(code))
+                                for (data, code) in zip(crypt_data, xor_code)])
+                print(f'I am `XOR.dec()`. original = {cipher_message}, affter = {ret}')
+                return "".join([chr(ord(data) ^ ord(code))
+                                for (data, code) in zip(crypt_data, xor_code)])
 
 class RSA(BaseEncryption):
     pass
