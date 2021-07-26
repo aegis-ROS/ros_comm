@@ -442,12 +442,12 @@ class RegManager(RegistrationListener):
             while not registered and not is_shutdown():
                 try:
                     if reg_type == Registration.PUB:
-                        self.logger.debug("master.registerPublisher(%s, %s, %s, %s)"%args)
+                        # self.logger.debug("master.registerPublisher(%s, %s, %s, %s)"%args)
                         code, msg, val = master.registerPublisher(*args)
                         if code != 1:
                             logfatal("unable to register publication [%s] with master: %s"%(resolved_name, msg))
                     elif reg_type == Registration.SUB:
-                        self.logger.debug("master.registerSubscriber(%s, %s, %s, %s)"%args)
+                        # self.logger.debug("master.registerSubscriber(%s, %s, %s, %s)"%args)
                         code, msg, val = master.registerSubscriber(*args)
                         if code == 1:
                             self.publisher_update(resolved_name, val)
@@ -455,11 +455,11 @@ class RegManager(RegistrationListener):
                             # this is potentially worth exiting over. in the future may want to add a retry
                             # timer
                             logfatal("unable to register subscription [%s] with master: %s"%(resolved_name, msg))
-                    elif reg_type == Registration.SRV:
-                        self.logger.debug("master.registerService(%s, %s, %s, %s)"%args)
-                        code, msg, val = master.registerService(*args)
-                        if code != 1:
-                            logfatal("unable to register service [%s] with master: %s"%(resolved_name, msg))
+                    # elif reg_type == Registration.SRV:
+                    #     self.logger.debug("master.registerService(%s, %s, %s, %s)"%args)
+                    #     code, msg, val = master.registerService(*args)
+                    #     if code != 1:
+                    #         logfatal("unable to register service [%s] with master: %s"%(resolved_name, msg))
                         
                     registered = True
                 except Exception as e:
